@@ -16,12 +16,10 @@ export default function BlogApp() {
   useEffect(() => {
     if (category === "News") {
       setLoading(true);
-      fetch(
-        `http://api.mediastack.com/v1/news?access_key=a6c2cb75bf118c3b93b18a1960d3abed&languages=en&limit=50`
-      )
+      fetch("/api/news") // Updated to call your internal API route
         .then((res) => res.json())
         .then((data) => {
-          setNews(data.data || []);
+          setNews(data.headlines || []);
           setLoading(false);
         })
         .catch((err) => {
@@ -55,6 +53,8 @@ export default function BlogApp() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  console.log('console was cleared');
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -104,16 +104,13 @@ export default function BlogApp() {
               <NewsCard
                 key={item.id || index}
                 title={item.title}
-                description={item.excerpt || item.description}
+                description={
+                  item.description || item.content || "No description"
+                }
                 url={
-                  category === "Adlut"
-                    ? `/blog/${item.id}`
-                    : item.url || "#"
+                  category === "Adlut" ? `/blog/${item.id}` : item.link || "#"
                 }
-                image={
-                  item.image ||
-                  "https://via.placeholder.com/400x200.png?text=No+Image"
-                }
+                image={category === "Adlut" ? item.image : item.image_url}
               />
             ))}
           </div>
