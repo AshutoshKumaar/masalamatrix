@@ -2,7 +2,7 @@
 
 export async function GET() {
   const apiKey = process.env.NEWSDATA_API_KEY;
-  const url = `https://newsdata.io/api/1/latest?apikey=${apiKey}&language=hi&country=in&category=top`;
+  const url = `https://newsdata.io/api/1/latest?apikey=pub_dfb7b4cf1b1e4b558240ba729ab23fcc&language=hi&country=in&category=top`;
 
   try {
     const res = await fetch(url);
