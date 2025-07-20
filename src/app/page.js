@@ -1,103 +1,151 @@
-import Image from "next/image";
+"use client";
+import React, { useEffect, useState } from "react";
+import blogPosts from "./blogData";
+import NewsCard from "./NewsCard";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
-export default function Home() {
+export default function BlogApp() {
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("News");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    if (category === "News") {
+      setLoading(true);
+      fetch(
+        `http://api.mediastack.com/v1/news?access_key=a6c2cb75bf118c3b93b18a1960d3abed&languages=en&limit=50`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setNews(data.data || []);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("API Error:", err);
+          setNews([]);
+          setLoading(false);
+        });
+    }
+  }, [category]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const filteredPosts =
+    category === "Adlut"
+      ? blogPosts
+          .filter(
+            (post) =>
+              post.title.toLowerCase().includes(search.toLowerCase()) ||
+              post.excerpt.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((post) => post.category === "Adlut")
+      : (news || []).filter((article) =>
+          article.title?.toLowerCase().includes(search.toLowerCase())
+        );
+
+  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="bg-gray-100 min-h-screen">
+      <Navbar />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            {category === "Adlut" ? "📘 Adlut Stories" : "📰 Latest News"}
+          </h2>
+
+          {/* Filter Controls */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setSearch("");
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="News">News</option>
+              <option value="Adlut">Adlut</option>
+            </select>
+          </div>
         </div>
+
+        {/* Cards */}
+        {loading ? (
+          <p className="text-center text-gray-500 h-screen">Loading...</p>
+        ) : (
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+            {paginatedPosts.map((item, index) => (
+              <NewsCard
+                key={item.id || index}
+                title={item.title}
+                description={item.excerpt || item.description}
+                url={
+                  category === "Adlut"
+                    ? `/blog/${item.id}`
+                    : item.url || "#"
+                }
+                image={
+                  item.image ||
+                  "https://via.placeholder.com/400x200.png?text=No+Image"
+                }
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="w-full mt-6 px-4 flex flex-wrap gap-3 justify-start">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`px-4 py-2 rounded text-sm md:text-base ${
+                  currentPage === i + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                } transition duration-300 ease-in-out`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {paginatedPosts.length === 0 && !loading && (
+          <p className="text-center mt-6 text-gray-500 text-sm md:text-base h-screen">
+            No items match your search.
+          </p>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer />
     </div>
   );
 }
