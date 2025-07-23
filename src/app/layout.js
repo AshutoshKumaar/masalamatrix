@@ -22,6 +22,9 @@ const mooli = Mooli({
 export const metadata = {
   title: "MasalaMatrix",
   description: "News + Adult Tales – Spicy Web App",
+  verification: {
+    google: "yrhURhS8kyKgdW23REs09mYU6GtkCXomegbXKLuvYOI", // 👈 Add this line
+  },
 };
 
 export default function RootLayout({ children }) {
