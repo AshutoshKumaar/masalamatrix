@@ -25,6 +25,9 @@ export const metadata = {
   verification: {
     google: "yrhURhS8kyKgdW23REs09mYU6GtkCXomegbXKLuvYOI", // 👈 Add this line
   },
+ other: {
+    monetag: "1954db27f9decb953ef71b544e99cfee", // ✅ Monetag tag added
+  },
 };
 
 export default function RootLayout({ children }) {
