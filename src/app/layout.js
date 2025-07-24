@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Mooli } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout"; // 👈 wrap client stuff
+import MonetagAdScript from "./components/MonetagAdScript";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${mooli.variable} antialiased`}>
         <ClientLayout>{children}</ClientLayout> {/* ✅ Wrap here */}
+        <MonetagAdScript />
       </body>
     </html>
   );
