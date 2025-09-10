@@ -3,6 +3,8 @@ import { Mooli } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout"; // 👈 wrap client stuff
 // import MonetagAdScript from "./components/MonetagAdScript";
+import Script from "next/script";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +36,26 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      
       <body className={`${mooli.variable} antialiased`}>
         {/* <MonetagAdScript /> */}
         <ClientLayout>{children}</ClientLayout> {/* ✅ Wrap here */}
+         <Script
+          id="monetag-script"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(s => { 
+              s.dataset.zone='9620754'; 
+              s.src='https://al5sm.com/tag.min.js'
+            })(
+              [document.documentElement, document.body]
+                .filter(Boolean)
+                .pop()
+                .appendChild(document.createElement('script'))
+            );`,
+          }}
+        />
+
       </body>
     </html>
   );
